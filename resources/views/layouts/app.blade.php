@@ -79,9 +79,13 @@
             <div class="alert alert-success">
                 {{ session('status') }}
             </div>
+        @elseif (session('alert'))
+            <div class="alert alert-danger">
+                {{ session('alert') }}
+            </div>
         @endif
 
-        <main class="py-4">
+        <main class="container py-4">
             @yield('content')
         </main>
     </div>

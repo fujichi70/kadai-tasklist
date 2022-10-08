@@ -23,6 +23,8 @@ class TasksController extends Controller
             $user = \Auth::user();
             $tasklists = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
             
+            $user->loadRelationshipCounts();
+            
             return view('tasklists.index', [
                 'user' => $user,
                 'tasklists' => $tasklists
@@ -77,11 +79,17 @@ class TasksController extends Controller
     {
         $user = \Auth::user();
         $tasklist = Task::findOrFail($id);
-
-        return view('tasklists.show', [
-            'user' => $user,
-            'tasklist' => $tasklist,
-        ]);
+        
+        if ($user->id == $tasklist->user_id) {
+        
+            return view('tasklists.show', [
+                'user' => $user,
+                'tasklist' => $tasklist,
+            ]);
+        
+        } else {
+            return redirect('/')->with('alert', 'error');
+        }
     }
 
     /**
@@ -117,6 +125,7 @@ class TasksController extends Controller
         
         $tasklist = Task::findOrFail($id);
         
+        
         $tasklist->content = $request->content;
         $tasklist->status = $request->status;
         $tasklist->save();
@@ -134,8 +143,10 @@ class TasksController extends Controller
     {
         $tasklist = Task::findOrFail($id);
         
-        $tasklist->delete();
-
-        return redirect('/');
+        if (\Auth::id() === $tasklist->user_id) {
+            $tasklist->delete();
+        }
+        
+        return redirect('/')->with('alert', 'deleted!');
     }
 }
