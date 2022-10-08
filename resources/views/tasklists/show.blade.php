@@ -3,27 +3,30 @@
 @section('content')
 
 
-<h1>id = {{ $tasklist->id }} のTask詳細ページ</h1>
+<h1 class="mb-4">{{ $user->name }}さんのTask詳細ページ</h1>
 
-    <table class="table table-bordered">
+    <table class="table table-bordered w-75 mb-4 mx-auto">
         <tr>
-            <th>I+id</th>
-            <td>{{ $tasklist->id }}</td>
-        </tr>
-        <tr>
+            <th>id</th>
             <th>Task</th>
-            <td>{{ $tasklist->content }}</td>
+            <th>Status</th>
         </tr>
         <tr>
-            <th>Status</th>
+            <td>{{ $tasklist->id }}</td>
+            <td>{{ $tasklist->content }}</td>
             <td>{{ $tasklist->status }}</td>
+        </tr>
+        <tr>
         </tr>
     </table>
     
-    {!! link_to_route('tasklists.edit', '編集', ['tasklist' => $tasklist->id], ['class' => 'btn btn-light']) !!}
+    <div class="d-flex w-75 mx-auto">
+    {!! link_to_route('tasklists.edit', '編集', ['tasklist' => $tasklist->id], ['class' => 'btn btn-primary mx-4']) !!}
     
     {!! Form::model($tasklist, ['route' => ['tasklists.destroy', $tasklist->id], 'method' => 'delete']) !!}
-        {!! Form::submit('削除', ['class' => 'btn btn-danger']) !!}
+        {!! Form::submit('削除', ['class' => 'btn btn-danger mx-4']) !!}
     {!! Form::close() !!}
+    </div>
+    
 
 @endsection

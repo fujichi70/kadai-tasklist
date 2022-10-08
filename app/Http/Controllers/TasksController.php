@@ -3,10 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Task;
+use App\Models\User;
 
 class TasksController extends Controller
 {
+    
+    public function __construct(){
+    $this->middleware('auth');
+  }
     /**
      * Display a listing of the resource.
      *
@@ -14,11 +20,16 @@ class TasksController extends Controller
      */
     public function index()
     {
-        $tasklists = Task::all();
+            $user = \Auth::user();
+            $tasklists = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
+            
+            $user->loadRelationshipCounts();
+            
+            return view('tasklists.index', [
+                'user' => $user,
+                'tasklists' => $tasklists
+            ]);
         
-        return view('tasklists.index', [
-            'tasklists' => $tasklists    
-        ]);
     }
 
     /**
@@ -50,12 +61,12 @@ class TasksController extends Controller
             'status' => 'required|max:10',   
         ]);
         
-        $tasklist = new Task;
-        $tasklist->content = $request->content;
-        $tasklist->status = $request->status;
-        $tasklist->save();
+        $request->user()->tasks()->create([
+            'content' => $request->content,
+            'status' => $request->status,
+        ]);
         
-        return redirect('/');
+        return redirect('/')->with('status', 'seccess!');
     }
 
     /**
@@ -66,11 +77,19 @@ class TasksController extends Controller
      */
     public function show($id)
     {
+        $user = \Auth::user();
         $tasklist = Task::findOrFail($id);
-
-        return view('tasklists.show', [
-            'tasklist' => $tasklist,
-        ]);
+        
+        if ($user->id == $tasklist->user_id) {
+        
+            return view('tasklists.show', [
+                'user' => $user,
+                'tasklist' => $tasklist,
+            ]);
+        
+        } else {
+            return redirect('/')->with('alert', 'error');
+        }
     }
 
     /**
@@ -106,6 +125,7 @@ class TasksController extends Controller
         
         $tasklist = Task::findOrFail($id);
         
+        
         $tasklist->content = $request->content;
         $tasklist->status = $request->status;
         $tasklist->save();
@@ -123,8 +143,10 @@ class TasksController extends Controller
     {
         $tasklist = Task::findOrFail($id);
         
-        $tasklist->delete();
-
-        return redirect('/');
+        if (\Auth::id() === $tasklist->user_id) {
+            $tasklist->delete();
+        }
+        
+        return redirect('/')->with('alert', 'deleted!');
     }
 }
