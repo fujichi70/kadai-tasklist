@@ -10,4 +10,14 @@ class Task extends Model
     use HasFactory;
     
     protected $table = 'tasklist';
+    
+    protected $fillable = [
+        'content',
+        'status',
+    ];
+    
+     public function users()
+    {
+        return $this->belongTo(User::class);
+    }
 }

@@ -18,6 +18,13 @@ use App\Http\Controllers\TasksController;
 //     return view('welcome');
 // });
 
+Auth::routes();
+
 Route::get('/', [TasksController::class, 'index']);
 
-Route::resource('tasklists', TasksController::class);
+Route::group(['middleware' => ['auth']], function() {
+    Route::resource('tasklists', TasksController::class);
+});
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
